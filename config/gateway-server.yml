@@ -1,0 +1,39 @@
+server:
+  port: 8072
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://localhost:8070/eureka/
+spring:
+  cloud:
+    gateway:
+      discovery.locator:
+        enabled: true
+        lowerCaseServiceId: true
+        cloud:
+      routes:
+        - id: licensing-service
+          predicates:
+          - Path=/licsvc/**
+          uri: lb://LICENSING-SERVICE
+          filters:
+          - RewritePath=/licsvc/(?<segment>.*), /${segment}
+        - id: organization-service
+          predicates:
+          - Path=/orgsvc/**
+          uri: lb://ORGANIZATION-SERVICE
+          filters:
+          - RewritePath=/orgsvc/(?<segment>.*), /${segment}        
+        
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "gateway,health,info,metrics"
+  endpoint:
+    gateway:
+      enabled: true
